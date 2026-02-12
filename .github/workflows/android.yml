@@ -1,0 +1,40 @@
+name: Build Ghost PRO APK
+on: [push, workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Install System Dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git python3-dev ffmpeg libsdl2-dev zlib1g-dev openjdk-17-jdk lib32z1 lib32stdc++6
+          pip install --upgrade Cython==0.29.33 buildozer virtualenv
+
+      - name: Fix Android SDK and Permissions
+        run: |
+          # Пре-инсталляция нужных инструментов для предотвращения ошибки aidl
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME "build-tools;31.0.0" "platforms;android-33"
+          # Даем права на выполнение
+          sudo chmod +x $ANDROID_HOME/build-tools/31.0.0/aidl || true
+
+      - name: Build with Buildozer
+        run: |
+          export PATH=$PATH:$HOME/.local/bin
+          # Запуск сборки
+          buildozer android debug
+        env:
+          ACCEPT_SDK_LICENSE: "y"
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GhostPRO-Signed-Package
+          path: bin/*.apk
