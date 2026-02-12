@@ -21,7 +21,7 @@ jobs:
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Принудительно принимаем все лицензии Android SDK перед сборкой
+          # ПРИНУДИТЕЛЬНОЕ ПРИНЯТИЕ ЛИЦЕНЗИЙ (решает твою проблему)
           yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --sdk_root=$ANDROID_HOME --licenses
           buildozer android debug
         env:
