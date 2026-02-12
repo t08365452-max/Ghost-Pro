@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
+        canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.2; }
+        .ui { position: relative; z-index: 1; padding: 20px; display: flex; flex-direction: column; height: 100vh; box-sizing: border-box; }
+        .terminal { flex-grow: 1; overflow-y: auto; border: 1px solid #0f0; padding: 10px; background: rgba(0,5,0,0.9); box-shadow: 0 0 10px #0f0; margin-bottom: 10px; }
+        input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; width: 100%; box-sizing: border-box; margin-top: 10px; outline: none; }
+        .btn { background: #0f0; color: #000; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
+        .hidden { display: none; }
+        .system-msg { color: #fff; font-size: 12px; border-left: 2px solid #fff; padding-left: 5px; margin: 5px 0; }
+    </style>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+    <div class="ui">
+        <div id="status">GHOST_OS: ENCRYPTED_LINK</div>
+        
+        <div class="terminal" id="output">
+            <div>[SYSTEM]: Ожидание авторизации...</div>
+        </div>
+
+        <div id="auth-box">
+            <input type="email" id="email" placeholder="EMAIL_ADDRESS">
+            <input type="password" id="pass" placeholder="ACCESS_PASSWORD">
+            <button class="btn" onclick="sendToPy('register', {e: val('email'), p: val('pass')})">REGISTRATION</button>
+            <button class="btn" onclick="sendToPy('login', {e: val('email'), p: val('pass')})">LOG_IN</button>
+            <button class="btn" style="background:#444" onclick="sendToPy('reset', val('email'))">RECOVERY_ACCESS</button>
+        </div>
+
+        <div id="2fa-box" class="hidden">
+            <div class="system-msg">Введите 6-значный код из письма:</div>
+            <input type="text" id="code" placeholder="000000">
+            <button class="btn" onclick="sendToPy('verify_2fa', val('code'))">VERIFY_IDENTITY</button>
+        </div>
+
+        <div id="main-ui" class="hidden">
+            <input type="text" id="msg" placeholder="Type encrypted packet...">
+            <button class="btn" onclick="sendToPy('send_msg', val('msg'))">SEND</button>
+            <button class="btn" style="background:#b00; color:#fff" onclick="sendToPy('support', val('msg'))">REPORT / SUPPORT</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+        const drops = Array(Math.floor(canvas.width / 16)).fill(1);
+        function draw() {
+            ctx.fillStyle = "rgba(0,0,0,0.05)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = "#0f0"; ctx.font = "16px monospace";
+            drops.forEach((y, i) => {
+                ctx.fillText(Math.floor(Math.random()*2), i*16, y*16);
+                if (y*16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            });
+        }
+        setInterval(draw, 33);
+
+        function val(id) { return document.getElementById(id).value; }
+        function sendToPy(a, d) { Kivy.send_to_python(a, JSON.stringify(d)); }
+        
+        function log(t, color="#0f0") {
+            const d = document.createElement('div');
+            d.style.color = color;
+            d.innerText = `> ${t}`;
+            document.getElementById('output').appendChild(d);
+            document.getElementById('output').scrollTop = 99999;
+        }
+
+        // Вызов уведомления в UI
+        function show_notify(title, text) {
+            log(`NOTIFY: ${title} - ${text}`, "#fff");
+        }
+    </script>
+</body>
+</html>
