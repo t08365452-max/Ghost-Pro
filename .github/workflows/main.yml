@@ -1,25 +1,34 @@
-name: Build Ghost PRO 2026
+name: Build Ghost PRO Final
 on: push
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    # Используем готовый образ, где всё уже настроено
-    container:
-      image: ghcr.io/kivy/buildozer:master
-
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build APK with Buildozer
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install System Dependencies
         run: |
-          # Соглашаемся с лицензиями внутри контейнера
+          sudo apt update
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
+          # Ставим конкретную версию Cython для стабильности
+          pip install --upgrade Cython==0.29.33 buildozer
+
+      - name: Build APK
+        run: |
+          export PATH=$PATH:$HOME/.local/bin
+          # Сначала принимаем все лицензии, потом запускаем билд
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
 
-      - name: Upload Finished APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-2026-Ready
+          name: Ghost-PRO-App
           path: bin/*.apk
