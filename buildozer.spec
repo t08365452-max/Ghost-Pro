@@ -6,13 +6,15 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-# ВАЖНО: Убрал номер версии у cryptography, чтобы система сама подобрала совместимую
-requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests,cryptography,pyjnius,pyrebase4,openssl
+# Оставляем только самое необходимое. 
+# pyrebase4 сам возьмет нужные зависимости внутри себя.
+requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests,pyrebase4,pyjnius
 
 orientation = portrait
 fullscreen = 0
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE, VIBRATE
 
+# Настройки для стабильности
 android.api = 33
 android.minapi = 21
 android.ndk = 25b
