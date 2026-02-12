@@ -7,17 +7,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Dependencies
+      - name: Install System Dependencies
         run: |
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          # Важно: фиксируем Cython, который любит Kivy 2.2.1
-          pip3 install --user --upgrade "Cython<3.0" buildozer 
+          # Фиксируем Cython для Kivy 2.2.1
+          pip3 install --user --upgrade "Cython<3.0" buildozer
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Соглашаемся с лицензиями и запускаем
+          # Авто-согласие с лицензиями
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
