@@ -4,7 +4,7 @@ from kivy.app import App
 from kivy.uix.webview import WebView
 from cryptography.fernet import Fernet
 
-# Твои данные из google-services.json
+# Твои данные из конфига
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -18,7 +18,6 @@ firebase_config = {
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
 db = firebase.database()
-# Ключ для E2EE шифрования
 cipher = Fernet(b'6fL3_F5_E8v1pXz7_m-90U5IF-ri8GYQ_ABCDE123456=')
 
 class GhostPRO(App):
@@ -30,29 +29,26 @@ class GhostPRO(App):
         data = json.loads(data_json)
         try:
             if action == 'register':
-                # Регистрация и отправка письма подтверждения
                 user = auth.create_user_with_email_and_password(data['e'], data['p'])
                 auth.send_email_verification(user['idToken'])
-                self.view.execute_js("log('REG_OK: Проверьте почту для активации 2FA!')")
+                self.view.execute_js("log('REG_OK: Код подтверждения отправлен!')")
 
             elif action == 'login':
-                # Вход только если почта подтверждена
                 user = auth.sign_in_with_email_and_password(data['e'], data['p'])
                 info = auth.get_account_info(user['idToken'])
                 if info['users'][0]['emailVerified']:
-                    self.view.execute_js("set_view('chat'); log('LOG_IN: ДОСТУП РАЗРЕШЕН')")
+                    self.view.execute_js("set_view('chat'); log('ВХОД ВЫПОЛНЕН')")
                 else:
-                    self.view.execute_js("log('ОШИБКА: Почта не подтверждена!', '#ffae00')")
+                    self.view.execute_js("log('ERR: Подтвердите почту!', '#ffae00')")
 
             elif action == 'send_msg':
-                # Шифрование и отправка в Firebase
                 enc = cipher.encrypt(data.encode()).decode()
                 db.child("messages").push({"m": enc})
-                self.view.execute_js("log('Пакет зашифрован и отправлен.')")
+                self.view.execute_js("log('Пакет зашифрован.')")
 
         except Exception as e:
-            err_msg = str(e).replace("'", "").replace('"', "")
-            self.view.execute_js(f"log('SYSTEM_ERR: {err_msg[:40]}...', '#f00')")
+            msg = str(e).replace("'", "").replace('"', "")
+            self.view.execute_js(f"log('ERROR: {msg[:40]}...', '#f00')")
 
 if __name__ == "__main__":
     GhostPRO().run()
