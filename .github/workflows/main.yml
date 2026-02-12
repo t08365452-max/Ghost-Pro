@@ -1,4 +1,4 @@
-name: Build Ghost PRO
+name: Build Ghost PRO APK
 on: push
 
 jobs:
@@ -13,11 +13,10 @@ jobs:
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
           pip3 install --user --upgrade Cython==0.29.33 buildozer
 
-      - name: Build APK
+      - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Чистим старые косяки и запускаем чистую сборку
-          buildozer android clean
+          # Соглашаемся со всеми лицензиями и запускаем сборку
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
@@ -25,5 +24,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-Final
+          name: GhostPRO-Final-APK
           path: bin/*.apk
