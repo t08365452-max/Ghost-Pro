@@ -11,12 +11,13 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          pip3 install --user --upgrade Cython==0.29.33 buildozer
+          # Важно: фиксируем Cython, который любит Kivy 2.2.1
+          pip3 install --user --upgrade "Cython<3.0" buildozer 
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Соглашаемся со всеми лицензиями и запускаем сборку
+          # Соглашаемся с лицензиями и запускаем
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
@@ -24,5 +25,5 @@ jobs:
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-Final-APK
+          name: GhostPRO-Final
           path: bin/*.apk
