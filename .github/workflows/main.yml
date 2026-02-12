@@ -1,4 +1,4 @@
-name: Build Ghost PRO APK
+name: Build Ghost PRO
 on: push
 
 jobs:
@@ -10,14 +10,14 @@ jobs:
       - name: Install System Dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev
-          # Фиксируем Cython для Kivy 2.2.1
+          sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev libltdl-dev
+          # Строго фиксируем Cython для этой версии Kivy
           pip3 install --user --upgrade "Cython<3.0" buildozer
 
       - name: Build with Buildozer
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Авто-согласие с лицензиями
+          # Соглашаемся с лицензиями и запускаем чистую сборку
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
