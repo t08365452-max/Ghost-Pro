@@ -2,9 +2,7 @@ import json
 import pyrebase
 from kivy.app import App
 from kivy.uix.webview import WebView
-from cryptography.fernet import Fernet
 
-# Твой конфиг из Firebase
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -17,8 +15,6 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
-db = firebase.database()
-cipher = Fernet(b'6fL3_F5_E8v1pXz7_m-90U5IF-ri8GYQ_ABCDE123456=')
 
 class GhostPRO(App):
     def build(self):
@@ -31,14 +27,14 @@ class GhostPRO(App):
             if action == 'register':
                 user = auth.create_user_with_email_and_password(data['e'], data['p'])
                 auth.send_email_verification(user['idToken'])
-                self.view.execute_js("log('REG: Письмо отправлено!')")
+                self.view.execute_js("log('REG_OK: Подтвердите почту!')")
             elif action == 'login':
                 user = auth.sign_in_with_email_and_password(data['e'], data['p'])
                 info = auth.get_account_info(user['idToken'])
                 if info['users'][0]['emailVerified']:
-                    self.view.execute_js("set_view('chat'); log('ACCESS: OK')")
+                    self.view.execute_js("set_view('chat'); log('ДОСТУП ОТКРЫТ')")
                 else:
-                    self.view.execute_js("log('ERR: Подтвердите почту!', '#ff0')")
+                    self.view.execute_js("log('ERR: Почта не подтверждена!', '#ff0')")
         except Exception as e:
             self.view.execute_js(f"log('ERROR: {str(e)[:40]}', '#f00')")
 
