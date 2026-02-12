@@ -6,8 +6,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-# ВАЖНО: Фиксируем старую версию криптографии, чтобы она не требовала Rust-компилятор
-requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests,cryptography==3.4.8,pyjnius,pyrebase4,openssl
+# ВАЖНО: Убрал номер версии у cryptography, чтобы система сама подобрала совместимую
+requirements = python3,kivy==2.2.1,kivymd==1.1.1,requests,cryptography,pyjnius,pyrebase4,openssl
 
 orientation = portrait
 fullscreen = 0
