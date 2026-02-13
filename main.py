@@ -2,6 +2,7 @@ import json
 from kivy.app import App
 from kivy.utils import platform
 
+# Если мы на Android, настраиваем WebView
 if platform == 'android':
     from android.runnable import run_on_ui_thread
     from jnius import autoclass, PythonJavaClass, java_method
@@ -30,14 +31,20 @@ class GhostPRO(App):
     def create_webview(self):
         self.webview = WebView(Activity)
         self.webview.getSettings().setJavaScriptEnabled(True)
+        self.webview.getSettings().setDomStorageEnabled(True) # Важно для JS
         self.webview.setWebViewClient(WebViewClient())
+        
+        # Подключаем твой интерфейс из index.html
         self.interface = JSInterface(self.on_python_call)
         self.webview.addJavascriptInterface(self.interface, "Kivy")
+        
+        # Загружаем локальный index.html
         self.webview.loadUrl("file:///android_asset/index.html")
         Activity.setContentView(self.webview)
 
     def on_python_call(self, action, data_json):
-        print(f"Signal: {action}")
+        # Тут будет обработка логина/регистрации из твоего HTML
+        print(f"Action: {action}, Data: {data_json}")
 
 if __name__ == "__main__":
     GhostPRO().run()
