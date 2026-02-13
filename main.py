@@ -1,8 +1,8 @@
 import json
 from kivy.app import App
 from kivy.utils import platform
+from kivy.clock import Clock
 
-# Если мы на Android, настраиваем WebView
 if platform == 'android':
     from android.runnable import run_on_ui_thread
     from jnius import autoclass, PythonJavaClass, java_method
@@ -23,27 +23,33 @@ else:
 
 class GhostPRO(App):
     def build(self):
-        if platform == 'android':
-            self.create_webview()
+        # Задержка 0.2 сек убирает конфликт при инициализации окна
+        Clock.schedule_once(self.init_app, 0.2)
         return None
+
+    def init_app(self, dt):
+        self.create_webview()
 
     @run_on_ui_thread
     def create_webview(self):
-        self.webview = WebView(Activity)
-        self.webview.getSettings().setJavaScriptEnabled(True)
-        self.webview.getSettings().setDomStorageEnabled(True) # Важно для JS
-        self.webview.setWebViewClient(WebViewClient())
-        
-        # Подключаем твой интерфейс из index.html
-        self.interface = JSInterface(self.on_python_call)
-        self.webview.addJavascriptInterface(self.interface, "Kivy")
-        
-        # Загружаем локальный index.html
-        self.webview.loadUrl("file:///android_asset/index.html")
-        Activity.setContentView(self.webview)
+        try:
+            self.webview = WebView(Activity)
+            self.webview.getSettings().setJavaScriptEnabled(True)
+            self.webview.getSettings().setDomStorageEnabled(True)
+            self.webview.setWebViewClient(WebViewClient())
+            
+            # Связь с JS: Kivy.send_to_python(action, data)
+            self.interface = JSInterface(self.on_python_call)
+            self.webview.addJavascriptInterface(self.interface, "Kivy")
+            
+            # Загрузка твоего HTML из папки assets
+            self.webview.loadUrl("file:///android_asset/index.html")
+            Activity.setContentView(self.webview)
+        except Exception as e:
+            print(f"REPORT_ERROR: {e}")
 
     def on_python_call(self, action, data_json):
-        # Тут будет обработка логина/регистрации из твоего HTML
+        # Ловим данные от кнопок регистрация/логин из index.html
         print(f"Action: {action}, Data: {data_json}")
 
 if __name__ == "__main__":
