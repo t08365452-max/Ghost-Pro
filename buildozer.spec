@@ -6,7 +6,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-requirements = python3,kivy==2.2.1,requests,pyrebase4,cryptography==38.0.4,pyjnius,android,openssl
+# ВАЖНО: pyrebase4 сам подтянет криптографию, не мешаем ему
+requirements = python3,kivy==2.2.1,requests,pyrebase4,pyjnius,android,openssl
 
 orientation = portrait
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
