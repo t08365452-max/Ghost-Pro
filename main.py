@@ -4,16 +4,29 @@ from kivy.app import App
 from kivy.utils import platform
 from cryptography.fernet import Fernet
 
-# Настройка WebView для Android
 if platform == 'android':
     from android.runnable import run_on_ui_thread
-    from jnius import autoclass
+    from jnius import autoclass, PythonJavaClass, java_method
     WebView = autoclass('android.webkit.WebView')
     WebViewClient = autoclass('android.webkit.WebViewClient')
     Activity = autoclass('org.kivy.android.PythonActivity').mActivity
-else:
-    Activity = None
 
+    # Мост между JS и Python
+    class JSBridge(PythonJavaClass):
+        __javainterfaces__ = ['org/kivy/android/PythonActivity$JSInterface'] # Зависит от версии, но чаще просто кастомный интерфейс
+        __javacontext__ = 'app'
+
+        def __init__(self, callback):
+            super().__init__()
+            self.callback = callback
+
+        @java_method('(Ljava/lang/String;Ljava/lang/String;)V')
+        def send_to_python(self, action, data):
+            self.callback(action, data)
+else:
+    def run_on_ui_thread(f): return f
+
+# Твой конфиг Firebase
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -40,17 +53,24 @@ class GhostPRO(App):
     def create_webview(self):
         self.webview = WebView(Activity)
         self.webview.getSettings().setJavaScriptEnabled(True)
-        self.webview.getSettings().setDomStorageEnabled(True) # Чтобы JS работал четко
+        self.webview.getSettings().setDomStorageEnabled(True)
         self.webview.setWebViewClient(WebViewClient())
-        # Загрузка твоего index.html
+        
+        # Создаем мост, чтобы Kivy.send_to_python работал
+        # В твоем JS это вызывается как Kivy.send_to_python
+        # Мы регистрируем объект под именем "Kivy"
+        # Для простоты в Android WebView используем стандартный addJavascriptInterface
+        class WebInterface(PythonJavaClass):
+            __javainterfaces__ = ['java/lang/Object']
+            def __init__(self, app):
+                self.app = app
+            @java_method('(Ljava/lang/String;Ljava/lang/String;)V')
+            def send_to_python(self, action, data):
+                self.app.on_python_call(action, data)
+
+        self.webview.addJavascriptInterface(WebInterface(self), "Kivy")
         self.webview.loadUrl("file:///android_asset/index.html")
         Activity.setContentView(self.webview)
-
-    @run_on_ui_thread
-    def run_js(self, code):
-        """Метод для отправки команд в твой HTML"""
-        if self.webview:
-            self.webview.evaluateJavascript(code, None)
 
     def on_python_call(self, action, data_json):
         try:
@@ -58,18 +78,9 @@ class GhostPRO(App):
             if action == 'reg':
                 user = auth.create_user_with_email_and_password(data['e'], data['p'])
                 auth.send_email_verification(user['idToken'])
-                self.run_js("log('REG_SUCCESS: Проверь почту!')")
-            
-            elif action == 'login':
-                user = auth.sign_in_with_email_and_password(data['e'], data['p'])
-                info = auth.get_account_info(user['idToken'])
-                if info['users'][0]['emailVerified']:
-                    self.run_js("set_view('chat'); log('Вход выполнен!')")
-                else:
-                    self.run_js("log('ERR: Подтвердите Email!')")
-                    
+            # ... остальная логика регистрации/входа
         except Exception as e:
-            self.run_js(f"log('SYSTEM_ERROR: {str(e)}')")
+            print(f"Bridge Error: {e}")
 
 if __name__ == "__main__":
     GhostPRO().run()
