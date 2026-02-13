@@ -1,22 +1,22 @@
 [app]
 title = Ghost PRO
-package.name = ghostpro
-package.domain = org.ghost
+package.name = ghostmessenger
+package.domain = org.ghost.pro
 source.dir = .
+# Убедись, что html и js включены в список!
 source.include_exts = py,png,jpg,kv,html,js,json
-version = 1.0
+version = 1.3
 
-# Минимальный набор для стабильности на старте
-requirements = python3,kivy==2.2.1,pyjnius,android
+# Возвращаем зависимости для работы Firebase
+requirements = python3,kivy==2.2.1,pyjnius,android,requests,pyrebase4,urllib3
 
 orientation = portrait
-# API 34 идеально для Android 15
-android.api = 34
+android.api = 33
 android.minapi = 24
 android.ndk = 25b
-# Убираем все старое, оставляем только 64-бит для S24
 android.archs = arm64-v8a
 android.accept_sdk_license = True
+
 icon.filename = icon.png
 
 [buildozer]
