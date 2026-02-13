@@ -6,18 +6,17 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-# ВАЖНО: Только база. 
-# Библиотеки типа cryptography лучше добавлять, когда этот скелет соберется.
+# Минимальный набор для стабильности на старте
 requirements = python3,kivy==2.2.1,pyjnius,android
 
 orientation = portrait
-android.api = 33
-android.minapi = 21
+# API 34 идеально для Android 15
+android.api = 34
+android.minapi = 24
 android.ndk = 25b
+# Убираем все старое, оставляем только 64-бит для S24
 android.archs = arm64-v8a
 android.accept_sdk_license = True
-
-# Убедись, что файл icon.png реально лежит в папке!
 icon.filename = icon.png
 
 [buildozer]
