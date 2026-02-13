@@ -16,19 +16,15 @@
 <body>
     <canvas id="matrix"></canvas>
     <div class="ui">
-        <div id="status">GHOST_OS: ENCRYPTED_LINK</div>
+        <div id="status">GHOST_PRO_CORE: ACTIVE</div>
         <div class="terminal" id="output">
-            <div>[SYSTEM]: Ожидание авторизации...</div>
+            <div>[SYSTEM]: Инициализация зашифрованного канала...</div>
         </div>
         <div id="auth-box">
             <input type="email" id="email" placeholder="EMAIL_ADDRESS">
             <input type="password" id="pass" placeholder="ACCESS_PASSWORD">
             <button class="btn" onclick="sendToPy('register', {e: val('email'), p: val('pass')})">REGISTRATION</button>
             <button class="btn" onclick="sendToPy('login', {e: val('email'), p: val('pass')})">LOG_IN</button>
-        </div>
-        <div id="main-ui" class="hidden">
-            <input type="text" id="msg" placeholder="Type encrypted packet...">
-            <button class="btn" onclick="sendToPy('send_msg', val('msg'))">SEND</button>
         </div>
     </div>
     <script>
@@ -50,10 +46,10 @@
         function val(id) { return document.getElementById(id).value; }
         
         function sendToPy(a, d) { 
-            if (window.Kivy && window.Kivy.send_to_python) {
+            if (window.Kivy) {
                 Kivy.send_to_python(a, JSON.stringify(d)); 
             } else {
-                log("СИСТЕМА ИНИЦИАЛИЗИРУЕТСЯ...", "#ff0");
+                log("СИНХРОНИЗАЦИЯ ЯДРА...", "#ff0");
             }
         }
 
@@ -67,3 +63,4 @@
     </script>
 </body>
 </html>
+
