@@ -1,6 +1,4 @@
 import json
-import pyrebase
-import base64
 from kivy.app import App
 from kivy.utils import platform
 
@@ -22,19 +20,6 @@ if platform == 'android':
 else:
     def run_on_ui_thread(f): return f
 
-firebase_config = {
-    "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
-    "authDomain": "ghost-pro-5aa22.firebaseapp.com",
-    "projectId": "ghost-pro-5aa22",
-    "storageBucket": "ghost-pro-5aa22.firebasestorage.app",
-    "messagingSenderId": "332879455079",
-    "appId": "1:332879455079:android:15c36642c62d13e0dd05c2",
-    "databaseURL": "https://ghost-pro-5aa22-default-rtdb.firebaseio.com/"
-}
-
-firebase = pyrebase.initialize_app(firebase_config)
-auth = firebase.auth()
-
 class GhostPRO(App):
     def build(self):
         if platform == 'android':
@@ -52,8 +37,7 @@ class GhostPRO(App):
         Activity.setContentView(self.webview)
 
     def on_python_call(self, action, data_json):
-        # Временное шифрование через Base64, чтобы не ломать билд
-        print(f"Action: {action}, Data: {data_json}")
+        print(f"Signal: {action}")
 
 if __name__ == "__main__":
     GhostPRO().run()
