@@ -25,10 +25,6 @@
             <button class="btn" onclick="sendToPy('register', {e: val('email'), p: val('pass')})">REGISTRATION</button>
             <button class="btn" onclick="sendToPy('login', {e: val('email'), p: val('pass')})">LOG_IN</button>
         </div>
-        <div id="main-ui" class="hidden">
-            <input type="text" id="msg" placeholder="Type encrypted packet...">
-            <button class="btn" onclick="sendToPy('send_msg', val('msg'))">SEND</button>
-        </div>
     </div>
     <script>
         const canvas = document.getElementById('matrix');
@@ -46,7 +42,16 @@
         }
         setInterval(draw, 33);
         function val(id) { return document.getElementById(id).value; }
-        function sendToPy(a, d) { Kivy.send_to_python(a, JSON.stringify(d)); }
+        
+        // Исправлено: защита от вылета, если Kivy еще не готов
+        function sendToPy(a, d) { 
+            if (typeof Kivy !== "undefined") {
+                Kivy.send_to_python(a, JSON.stringify(d)); 
+            } else {
+                log("СИСТЕМА ЗАГРУЖАЕТСЯ...", "#ff0");
+            }
+        }
+
         function log(t, color="#0f0") {
             const d = document.createElement('div');
             d.style.color = color;
