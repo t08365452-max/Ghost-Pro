@@ -1,8 +1,8 @@
 import json
 import pyrebase
+import base64
 from kivy.app import App
 from kivy.utils import platform
-from cryptography.fernet import Fernet
 
 if platform == 'android':
     from android.runnable import run_on_ui_thread
@@ -22,7 +22,6 @@ if platform == 'android':
 else:
     def run_on_ui_thread(f): return f
 
-# Твой конфиг Firebase
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -35,8 +34,6 @@ firebase_config = {
 
 firebase = pyrebase.initialize_app(firebase_config)
 auth = firebase.auth()
-db = firebase.database()
-cipher = Fernet(b'6fL3_F5_E8v1pXz7_m-90U5IF-ri8GYQ_ABCDE123456=')
 
 class GhostPRO(App):
     def build(self):
@@ -55,7 +52,7 @@ class GhostPRO(App):
         Activity.setContentView(self.webview)
 
     def on_python_call(self, action, data_json):
-        # Логика обработки команд (reg, login и т.д.)
+        # Временное шифрование через Base64, чтобы не ломать билд
         print(f"Action: {action}, Data: {data_json}")
 
 if __name__ == "__main__":
