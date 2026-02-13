@@ -1,11 +1,10 @@
-import json
 import os
 import certifi
 from kivy.app import App
 from kivy.utils import platform
 from kivy.clock import Clock
 
-# Настройка SSL сертификатов для Firebase
+# Фикс для работы Firebase на новых Android
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 if platform == 'android':
@@ -14,7 +13,6 @@ if platform == 'android':
     
     WebView = autoclass('android.webkit.WebView')
     WebViewClient = autoclass('android.webkit.WebViewClient')
-    WebSettings = autoclass('android.webkit.WebSettings')
     Activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
     class JSInterface(PythonJavaClass):
@@ -34,28 +32,27 @@ class GhostPRO(App):
         return None
 
     @run_on_ui_thread
-    def create_webview(self, dt=None):
+    def create_webview(self, dt):
         try:
             self.webview = WebView(Activity)
-            settings = self.webview.getSettings()
-            settings.setJavaScriptEnabled(True)
-            settings.setDomStorageEnabled(True)
-            settings.setAllowFileAccess(True)
-            settings.setMixedContentMode(0) # Разрешить смешанный контент
+            s = self.webview.getSettings()
+            s.setJavaScriptEnabled(True)
+            s.setDomStorageEnabled(True)
+            s.setAllowFileAccess(True)
+            s.setDatabaseEnabled(True)
             
             self.webview.setWebViewClient(WebViewClient())
-            
             self.interface = JSInterface(self.on_python_call)
             self.webview.addJavascriptInterface(self.interface, "Kivy")
             
             self.webview.loadUrl("file:///android_asset/index.html")
             Activity.setContentView(self.webview)
         except Exception as e:
-            print(f"CRASH_PREVENTION: {e}")
+            print(f"CRASH_LOG: {e}")
 
     def on_python_call(self, action, data_json):
-        # Здесь будет логика регистрации/логина
-        print(f"GHOST_SIGNAL: {action} | DATA: {data_json}")
+        # Здесь ловим данные из твоего HTML
+        print(f"GHOST_IN: {action} | {data_json}")
 
 if __name__ == "__main__":
     GhostPRO().run()
