@@ -4,20 +4,23 @@ package.name = ghostmessenger
 package.domain = org.ghost.pro
 source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
-version = 2.3
+version = 3.0
 
-# Принудительно включаем всё для веса и стабильности
-requirements = python3,kivy==2.2.1,pyjnius,android,requests,pyrebase4,urllib3,certifi,openssl,hostpython3,sqlite3
+# Добавляем "тяжелые" модули, чтобы заставить билд упаковать Python
+requirements = python3,kivy==2.2.1,pyjnius,android,requests,pyrebase4,urllib3,certifi,openssl,hostpython3,sqlite3,chardet,idna
 
 orientation = portrait
 android.api = 34
-android.minapi = 29
+android.minapi = 21
 android.ndk = 25b
+# Собираем под оба типа процессоров
 android.archs = arm64-v8a, armeabi-v7a
 
 android.permissions = INTERNET, ACCESS_NETWORK_STATE, WRITE_EXTERNAL_STORAGE, POST_NOTIFICATIONS
 android.manifest.uses_cleartext_traffic = True
 android.accept_sdk_license = True
+
+# Убираем все заставки, только черный фон
 android.presplash_color = #000000
 presplash.filename = 
 icon.filename = icon.png
