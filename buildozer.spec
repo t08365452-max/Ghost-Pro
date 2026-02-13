@@ -6,7 +6,7 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-# ВАЖНО: pyrebase4 сам подтянет криптографию, не мешаем ему
+# Оставляем минимальный набор для стабильности
 requirements = python3,kivy==2.2.1,requests,pyrebase4,pyjnius,android,openssl
 
 orientation = portrait
@@ -15,7 +15,10 @@ android.api = 33
 android.minapi = 21
 android.ndk = 25b
 android.archs = arm64-v8a
+
+# КЛЮЧЕВАЯ СТРОКА ДЛЯ ОБХОДА ВОПРОСОВ:
 android.accept_sdk_license = True
+
 icon.filename = icon.png
 
 [buildozer]
