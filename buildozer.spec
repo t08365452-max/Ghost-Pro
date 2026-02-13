@@ -6,8 +6,8 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
 version = 1.0
 
-# Оставляем минимальный набор для стабильности
-requirements = python3,kivy==2.2.1,requests,pyrebase4,pyjnius,android,openssl
+# Самый стабильный набор библиотек
+requirements = python3,kivy==2.2.1,requests,pyrebase4,cryptography,pyjnius,android,openssl
 
 orientation = portrait
 android.permissions = INTERNET, READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE
@@ -16,7 +16,7 @@ android.minapi = 21
 android.ndk = 25b
 android.archs = arm64-v8a
 
-# КЛЮЧЕВАЯ СТРОКА ДЛЯ ОБХОДА ВОПРОСОВ:
+# ЭТО ВАЖНО: Принимаем лицензии автоматически
 android.accept_sdk_license = True
 
 icon.filename = icon.png
