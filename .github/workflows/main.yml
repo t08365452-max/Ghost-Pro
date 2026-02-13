@@ -1,4 +1,4 @@
-name: GhostPRO_Multi_Build
+name: GhostPRO_Universal_Build
 on: push
 
 jobs:
@@ -7,10 +7,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Free disk space
-        run: |
-          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo apt clean
+      - name: Free Disk Space
+        run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
 
       - name: Set up JDK 17
         uses: actions/setup-java@v4
@@ -18,27 +16,24 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install Dependencies
+      - name: Install System Deps
         run: |
           sudo apt update
-          # Убрали libtinfo5, добавили актуальные библиотеки 2026 года
+          # Убраны старые пакеты, вызывавшие ошибки на твоих скринах
           sudo apt install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev build-essential
           pip install --user --upgrade "Cython<3.0" buildozer
-
-      - name: Accept Android Licenses
-        run: |
-          yes | sdkmanager --licenses || true
 
       - name: Build APK
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Собираем без 'yes |', чтобы не было Broken Pipe
+          # Автоматическое принятие лицензий перед сборкой
+          yes | sdkmanager --licenses || true
           buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
 
-      - name: Upload Artifact
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-S24-Version
+          name: GhostPRO_MultiArch_v1_6
           path: bin/*.apk
