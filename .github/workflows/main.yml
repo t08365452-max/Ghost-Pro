@@ -1,4 +1,4 @@
-name: Build Ghost PRO 2026
+name: GhostPRO_Build
 on: push
 
 jobs:
@@ -6,26 +6,21 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v4
-
-      - name: Free Space
+      - name: Clean Space
         run: sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
-
-      - name: Install System Deps
+      - name: Deps
         run: |
           sudo apt update
           sudo apt install -y git zip unzip openjdk-17-jdk python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev build-essential
           pip install --user --upgrade "Cython<3.0" buildozer
-
-      - name: Build APK
+      - name: Build
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Принимаем все лицензии Android SDK
           yes | buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
-
-      - name: Upload APK
+      - name: Upload
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-Ready-App
+          name: GhostPRO-APK
           path: bin/*.apk
