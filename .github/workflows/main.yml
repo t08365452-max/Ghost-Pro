@@ -1,4 +1,4 @@
-name: GhostPRO_2026_Build
+name: GhostPRO_Multi_Build
 on: push
 
 jobs:
@@ -18,30 +18,27 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
-      - name: Install System Dependencies
+      - name: Install Dependencies
         run: |
           sudo apt update
-          sudo apt install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev libtinfo5 cmake libffi-dev libssl-dev build-essential
+          # Убрали libtinfo5, добавили актуальные библиотеки 2026 года
+          sudo apt install -y git zip unzip python3-pip autoconf libtool pkg-config zlib1g-dev libncurses5-dev libncursesw5-dev cmake libffi-dev libssl-dev build-essential
           pip install --user --upgrade "Cython<3.0" buildozer
 
-      - name: Accept Android Licenses (Silent)
+      - name: Accept Android Licenses
         run: |
-          # Устанавливаем лицензии напрямую в SDK, чтобы Buildozer не тупил
-          mkdir -p $HOME/.android
-          touch $HOME/.android/repositories.cfg
           yes | sdkmanager --licenses || true
 
-      - name: Build with Buildozer
+      - name: Build APK
         run: |
           export PATH=$PATH:$HOME/.local/bin
-          # Запуск БЕЗ 'yes |', так как лицензии уже приняты выше
+          # Собираем без 'yes |', чтобы не было Broken Pipe
           buildozer android debug
         env:
           BUILDOZER_ALLOW_ORG_GHOST: 1
-          APP_ANDROID_ACCEPT_SDK_LICENSE: "1"
 
-      - name: Upload APK
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: GhostPRO-Final-v1
+          name: GhostPRO-S24-Version
           path: bin/*.apk
