@@ -11,11 +11,9 @@ if platform == 'android':
     WebViewClient = autoclass('android.webkit.WebViewClient')
     Activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-    # Мост между JS и Python
-    class JSBridge(PythonJavaClass):
-        __javainterfaces__ = ['org/kivy/android/PythonActivity$JSInterface'] # Зависит от версии, но чаще просто кастомный интерфейс
-        __javacontext__ = 'app'
-
+    # Простой интерфейс для связи JS -> Python
+    class JSInterface(PythonJavaClass):
+        __javainterfaces__ = ['java/lang/Object']
         def __init__(self, callback):
             super().__init__()
             self.callback = callback
@@ -26,7 +24,7 @@ if platform == 'android':
 else:
     def run_on_ui_thread(f): return f
 
-# Твой конфиг Firebase
+# Твой Firebase конфиг
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -56,31 +54,26 @@ class GhostPRO(App):
         self.webview.getSettings().setDomStorageEnabled(True)
         self.webview.setWebViewClient(WebViewClient())
         
-        # Создаем мост, чтобы Kivy.send_to_python работал
-        # В твоем JS это вызывается как Kivy.send_to_python
-        # Мы регистрируем объект под именем "Kivy"
-        # Для простоты в Android WebView используем стандартный addJavascriptInterface
-        class WebInterface(PythonJavaClass):
-            __javainterfaces__ = ['java/lang/Object']
-            def __init__(self, app):
-                self.app = app
-            @java_method('(Ljava/lang/String;Ljava/lang/String;)V')
-            def send_to_python(self, action, data):
-                self.app.on_python_call(action, data)
-
-        self.webview.addJavascriptInterface(WebInterface(self), "Kivy")
+        # Регистрируем мост под именем Kivy, как в твоем index.html
+        self.interface = JSInterface(self.on_python_call)
+        self.webview.addJavascriptInterface(self.interface, "Kivy")
+        
+        # Загрузка
         self.webview.loadUrl("file:///android_asset/index.html")
         Activity.setContentView(self.webview)
 
     def on_python_call(self, action, data_json):
+        # Обработка данных от JS в отдельном потоке, чтобы не вешать UI
         try:
             data = json.loads(data_json)
             if action == 'reg':
                 user = auth.create_user_with_email_and_password(data['e'], data['p'])
                 auth.send_email_verification(user['idToken'])
-            # ... остальная логика регистрации/входа
+            elif action == 'login':
+                auth.sign_in_with_email_and_password(data['e'], data['p'])
+            # Добавь остальную логику сюда
         except Exception as e:
-            print(f"Bridge Error: {e}")
+            print(f"ERROR: {e}")
 
 if __name__ == "__main__":
     GhostPRO().run()
