@@ -4,25 +4,26 @@ package.name = ghostmessenger
 package.domain = org.ghost.pro
 source.dir = .
 source.include_exts = py,png,jpg,kv,html,js,json
-version = 1.9
+version = 2.2
 
-# Добавили библиотеки для работы с SSL и уведомлениями
-requirements = python3,kivy==2.2.1,pyjnius,android,requests,pyrebase4,urllib3,certifi,chardet,idna
+# Принудительно жирные требования для стабильности
+requirements = python3,kivy==2.2.1,pyjnius,android,requests,pyrebase4,urllib3,certifi,openssl,hostpython3,sqlite3
 
 orientation = portrait
-# API 34 — база для Android 14/15/16
+# Целимся в Android 14/15/16
 android.api = 34
+# Минималка — Android 10
 android.minapi = 29
 android.ndk = 25b
-# Поддержка всех современных ядер
+# Полный набор архитектур
 android.archs = arm64-v8a, armeabi-v7a
 
-# РАЗРЕШЕНИЯ (Интернет + Уведомления)
-android.permissions = INTERNET, ACCESS_NETWORK_STATE, POST_NOTIFICATIONS, WAKE_LOCK
-
-# Чтобы приложение не падало при запросах к Firebase
+# Разрешения для работы и уведомлений
+android.permissions = INTERNET, ACCESS_NETWORK_STATE, WRITE_EXTERNAL_STORAGE, POST_NOTIFICATIONS
 android.manifest.uses_cleartext_traffic = True
 android.accept_sdk_license = True
+
+# Черная заставка Ghost
 android.presplash_color = #000000
 presplash.filename = 
 icon.filename = icon.png
