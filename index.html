@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         body { background: #000; color: #0f0; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
         canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.2; }
@@ -9,20 +10,19 @@
         .terminal { flex-grow: 1; overflow-y: auto; border: 1px solid #0f0; padding: 10px; background: rgba(0,5,0,0.9); box-shadow: 0 0 10px #0f0; margin-bottom: 10px; }
         input { background: #000; border: 1px solid #0f0; color: #0f0; padding: 12px; width: 100%; box-sizing: border-box; margin-top: 10px; outline: none; }
         .btn { background: #0f0; color: #000; border: none; padding: 12px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 5px; }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
     <canvas id="matrix"></canvas>
     <div class="ui">
-        <div id="status">GHOST_OS: ENCRYPTED_LINK</div>
+        <div id="status">GHOST_PRO_v1.9: ONLINE</div>
         <div class="terminal" id="output">
-            <div>[SYSTEM]: Ожидание авторизации...</div>
+            <div>[SYSTEM]: Инициализация протоколов...</div>
         </div>
         <div id="auth-box">
-            <input type="email" id="email" placeholder="EMAIL_ADDRESS">
-            <input type="password" id="pass" placeholder="ACCESS_PASSWORD">
-            <button class="btn" onclick="sendToPy('register', {e: val('email'), p: val('pass')})">REGISTRATION</button>
+            <input type="email" id="email" placeholder="LOGIN_EMAIL">
+            <input type="password" id="pass" placeholder="PASSWORD">
+            <button class="btn" onclick="sendToPy('register', {e: val('email'), p: val('pass')})">REGISTER</button>
             <button class="btn" onclick="sendToPy('login', {e: val('email'), p: val('pass')})">LOG_IN</button>
         </div>
     </div>
@@ -42,16 +42,13 @@
         }
         setInterval(draw, 33);
         function val(id) { return document.getElementById(id).value; }
-        
-        // Исправлено: защита от вылета, если Kivy еще не готов
         function sendToPy(a, d) { 
             if (typeof Kivy !== "undefined") {
                 Kivy.send_to_python(a, JSON.stringify(d)); 
             } else {
-                log("СИСТЕМА ЗАГРУЖАЕТСЯ...", "#ff0");
+                log("СИНХРОНИЗАЦИЯ С ЯДРОМ...", "#ff0");
             }
         }
-
         function log(t, color="#0f0") {
             const d = document.createElement('div');
             d.style.color = color;
