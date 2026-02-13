@@ -1,4 +1,4 @@
-    import json
+import json
 import pyrebase
 from kivy.app import App
 from kivy.utils import platform
@@ -12,9 +12,7 @@ if platform == 'android':
     WebViewClient = autoclass('android.webkit.WebViewClient')
     Activity = autoclass('org.kivy.android.PythonActivity').mActivity
 else:
-    # Заглушка, чтобы код не вылетал на ПК
-    class WebView:
-        def __init__(self, **kwargs): pass
+    Activity = None
 
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
@@ -33,32 +31,45 @@ cipher = Fernet(b'6fL3_F5_E8v1pXz7_m-90U5IF-ri8GYQ_ABCDE123456=')
 
 class GhostPRO(App):
     def build(self):
-        # На Android мы создаем нативный WebView
+        self.webview = None
         if platform == 'android':
             self.create_webview()
-        return None # Интерфейс будет поверх окна Kivy
+        return None
 
     @run_on_ui_thread
     def create_webview(self):
-        webview = WebView(Activity)
-        webview.getSettings().setJavaScriptEnabled(True)
-        webview.setWebViewClient(WebViewClient())
-        # Загружаем твой index.html из папки приложения
-        webview.loadUrl("file:///android_asset/index.html")
-        Activity.setContentView(webview)
+        self.webview = WebView(Activity)
+        self.webview.getSettings().setJavaScriptEnabled(True)
+        self.webview.getSettings().setDomStorageEnabled(True) # Чтобы JS работал четко
+        self.webview.setWebViewClient(WebViewClient())
+        # Загрузка твоего index.html
+        self.webview.loadUrl("file:///android_asset/index.html")
+        Activity.setContentView(self.webview)
 
-    # Твоя логика обработки вызовов из JS остается без изменений
+    @run_on_ui_thread
+    def run_js(self, code):
+        """Метод для отправки команд в твой HTML"""
+        if self.webview:
+            self.webview.evaluateJavascript(code, None)
+
     def on_python_call(self, action, data_json):
         try:
             data = json.loads(data_json)
             if action == 'reg':
                 user = auth.create_user_with_email_and_password(data['e'], data['p'])
                 auth.send_email_verification(user['idToken'])
-                db.child("users").child(user['localId']).set({"status": "user"})
-                print("REG_SUCCESS")
-            # ... и так далее (весь твой остальной код)
+                self.run_js("log('REG_SUCCESS: Проверь почту!')")
+            
+            elif action == 'login':
+                user = auth.sign_in_with_email_and_password(data['e'], data['p'])
+                info = auth.get_account_info(user['idToken'])
+                if info['users'][0]['emailVerified']:
+                    self.run_js("set_view('chat'); log('Вход выполнен!')")
+                else:
+                    self.run_js("log('ERR: Подтвердите Email!')")
+                    
         except Exception as e:
-            print(f"Error: {e}")
+            self.run_js(f"log('SYSTEM_ERROR: {str(e)}')")
 
 if __name__ == "__main__":
     GhostPRO().run()
