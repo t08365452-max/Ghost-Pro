@@ -11,20 +11,18 @@ if platform == 'android':
     WebViewClient = autoclass('android.webkit.WebViewClient')
     Activity = autoclass('org.kivy.android.PythonActivity').mActivity
 
-    # Простой интерфейс для связи JS -> Python
     class JSInterface(PythonJavaClass):
         __javainterfaces__ = ['java/lang/Object']
         def __init__(self, callback):
             super().__init__()
             self.callback = callback
-
         @java_method('(Ljava/lang/String;Ljava/lang/String;)V')
         def send_to_python(self, action, data):
             self.callback(action, data)
 else:
     def run_on_ui_thread(f): return f
 
-# Твой Firebase конфиг
+# Твой конфиг Firebase
 firebase_config = {
     "apiKey": "AIzaSyAbiRCuR9egtHKg0FNzzBdL9dNqPqpPLNk",
     "authDomain": "ghost-pro-5aa22.firebaseapp.com",
@@ -42,7 +40,6 @@ cipher = Fernet(b'6fL3_F5_E8v1pXz7_m-90U5IF-ri8GYQ_ABCDE123456=')
 
 class GhostPRO(App):
     def build(self):
-        self.webview = None
         if platform == 'android':
             self.create_webview()
         return None
@@ -51,29 +48,15 @@ class GhostPRO(App):
     def create_webview(self):
         self.webview = WebView(Activity)
         self.webview.getSettings().setJavaScriptEnabled(True)
-        self.webview.getSettings().setDomStorageEnabled(True)
         self.webview.setWebViewClient(WebViewClient())
-        
-        # Регистрируем мост под именем Kivy, как в твоем index.html
         self.interface = JSInterface(self.on_python_call)
         self.webview.addJavascriptInterface(self.interface, "Kivy")
-        
-        # Загрузка
         self.webview.loadUrl("file:///android_asset/index.html")
         Activity.setContentView(self.webview)
 
     def on_python_call(self, action, data_json):
-        # Обработка данных от JS в отдельном потоке, чтобы не вешать UI
-        try:
-            data = json.loads(data_json)
-            if action == 'reg':
-                user = auth.create_user_with_email_and_password(data['e'], data['p'])
-                auth.send_email_verification(user['idToken'])
-            elif action == 'login':
-                auth.sign_in_with_email_and_password(data['e'], data['p'])
-            # Добавь остальную логику сюда
-        except Exception as e:
-            print(f"ERROR: {e}")
+        # Логика обработки команд (reg, login и т.д.)
+        print(f"Action: {action}, Data: {data_json}")
 
 if __name__ == "__main__":
     GhostPRO().run()
